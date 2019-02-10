@@ -1,0 +1,19 @@
+[main]
+G1 = ["A"]
+G2 = ["LEFTSHIFT+B+C"]
+"G3+G4" = ["D"]
+"G5" = """
+	function Down(state, handler)
+		handler.Keyboard:KeyDown({parseKey("H")})
+		handler.Keyboard:KeyUp({parseKey("H")})
+		handler.Keyboard:KeyDown({parseKey("E")})
+		handler.Keyboard:KeyUp({parseKey("E")})
+		handler.Keyboard:KeyDown({parseKey("L")})
+		handler.Keyboard:KeyUp({parseKey("L")})
+		handler.Keyboard:KeyDown({parseKey("L")})
+		handler.Keyboard:KeyUp({parseKey("L")})
+		handler.Keyboard:KeyDown({parseKey("O")})
+		handler.Keyboard:KeyUp({parseKey("O")})
+		handler.Mouse:MoveXYByStick(state.X, state.Y, 130, 111, 5)
+	end
+"""
