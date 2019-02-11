@@ -37,7 +37,10 @@ func NewHandler() *Handler {
 		log.Fatalf("CreateTouchPad: %s", err)
 	}
 	h := Handler{Profile: "main", Actions: Profiles{}, event: make(chan *g13.State)}
-	h.User = UserHandler{Keyboard: &UserKeyboard{kb: kb}, Mouse: &UserMouse{mouse: mouse, touchPad: touchPad}}
+	h.User = UserHandler{
+		Keyboard: &UserKeyboard{kb: kb},
+		Mouse:    &UserMouse{mouse: mouse, touchPad: touchPad, stopMoveCh: make(chan bool), movedCh: make(chan bool)},
+	}
 
 	h.wg.Add(1)
 	go h.eventHandler()
@@ -56,9 +59,12 @@ func (h *Handler) eventHandler() {
 				return
 			}
 
+			stick := (state.X != state.Old.X || state.Y != state.Old.Y)
+
 			for buttons, action := range h.Actions[h.Profile] {
-				active := state.Buttons.Test(buttons)
-				if active != action.Active {
+				if stick && buttons == g13.Stick {
+					action.Change(state)
+				} else if active := state.Buttons.Test(buttons); active != action.Active {
 					action.Active = active
 					if action.Active {
 						action.Down(state)

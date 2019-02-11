@@ -21,6 +21,7 @@ type Func func(state *g13.State)
 // Action contacts the action and state of the specific action
 type Action struct {
 	Active bool
+	Change Func
 	Down   Func
 	Up     Func
 }
@@ -61,6 +62,15 @@ func (h *Handler) BindLua(script *string) *Action {
 	luaUserHandler := luar.New(L, h.User)
 
 	action := Action{
+		Change: func(state *g13.State) {
+			luaState := luar.New(L, state)
+
+			L.CallByParam(lua.P{
+				Fn:      L.GetGlobal("Change"),
+				NRet:    0,
+				Protect: false,
+			}, luaState, luaUserHandler)
+		},
 		Down: func(state *g13.State) {
 			luaState := luar.New(L, state)
 
@@ -79,6 +89,10 @@ func (h *Handler) BindLua(script *string) *Action {
 				Protect: false,
 			}, luaState, luaUserHandler)
 		},
+	}
+
+	if L.GetGlobal("Change").Type() == lua.LTNil {
+		action.Change = func(state *g13.State) {}
 	}
 
 	if L.GetGlobal("Down").Type() == lua.LTNil {

@@ -42,7 +42,7 @@ It will read configuration from test.toml for now.
 - [x] G13 buttons to multiple keyboard keys mapping.
 - [x] G13 buttons to lua scripting actions mapping.
 - [x] Parsing profile and actions from TOML configuration file.
-- [ ] Mouse movement support. (ongoing)
+- [x] Stick mouse movement support.
 - [ ] TOML configuration folder.
 - [ ] Action to switch configuration.
 - [ ] HTTP endpoint for adding/modifying actions and profiles.

@@ -47,6 +47,7 @@ const (
 	Light      = Button(0x2000000000)
 	Light2     = Button(0x4000000000)
 	MiscToggle = Button(0x8000000000)
+	Stick      = Button(0x10000000000) // Fake key added for event handling of stick movements
 )
 
 // KEY map of all the known G13 buttons
@@ -90,6 +91,7 @@ var KEY = map[string]Button{
 	"TOP":         Top,
 	"UNDEF1":      Undef1,
 	"UNDEF3":      Undef3,
+	"STICK":       Stick,
 }
 
 type keys []string

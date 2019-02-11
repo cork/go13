@@ -1,13 +1,18 @@
 package action
 
 import (
+	"time"
+
 	uinput "github.com/sashko/go-uinput"
 )
 
 // UserMouse wrapper around uinput mouse
 type UserMouse struct {
-	mouse    uinput.Mice
-	touchPad uinput.TouchPad
+	mouse      uinput.Mice
+	touchPad   uinput.TouchPad
+	moving     bool
+	stopMoveCh chan bool
+	movedCh    chan bool
 }
 
 // MoveX wrapper around uinput Mouse MoveX
@@ -20,16 +25,65 @@ func (um *UserMouse) MoveY(y int32) {
 	um.mouse.MoveY(y)
 }
 
-// MoveXYByStick moves by x,y minus centerX/Y if the abs value is bigger then deadZone
-func (um *UserMouse) MoveXYByStick(x, y, centerX, centerY, deadZone int32) {
-	x = x - centerX
-	y = y - centerY
-	if x > deadZone || x < -deadZone {
-		um.MoveX(x)
+// MoveXYByStick moves by x,y minus centerX/Y if the abs value is bigger then deadZone repeated every step duration
+func (um *UserMouse) MoveXYByStick(x, y, centerX, centerY, xdeadZone, ydeadZone int32, speed float32) {
+	if um.moving {
+		um.stopMoveCh <- true
+		<-um.movedCh
+		um.moving = false
 	}
 
-	if y > deadZone || y < -deadZone {
-		um.MoveY(y)
+	x = x - centerX
+	y = y - centerY
+
+	if x < xdeadZone && x > -xdeadZone {
+		x = 0
+	} else {
+		if x > xdeadZone {
+			x -= xdeadZone
+		} else {
+			x += xdeadZone
+		}
+	}
+
+	if y < ydeadZone && y > -ydeadZone {
+		y = 0
+	} else {
+		if y > ydeadZone {
+			y -= ydeadZone
+		} else {
+			y += ydeadZone
+		}
+	}
+
+	x = int32(float32(x) * speed)
+	y = int32(float32(y) * speed)
+
+	if x != 0 || y != 0 {
+		go func() {
+			first := true
+			for {
+				select {
+				case <-um.stopMoveCh:
+					um.movedCh <- true
+					return
+				default:
+					if x != 0 {
+						um.MoveX(x)
+					}
+					if y != 0 {
+						um.MoveY(y)
+					}
+				}
+				if first {
+					um.movedCh <- true
+					first = false
+				}
+				time.Sleep(10 * time.Millisecond)
+			}
+		}()
+		<-um.movedCh
+		um.moving = true
 	}
 }
 

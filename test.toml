@@ -14,6 +14,18 @@ G2 = ["LEFTSHIFT+B+C"]
 		handler.Keyboard:KeyUp({parseKey("L")})
 		handler.Keyboard:KeyDown({parseKey("O")})
 		handler.Keyboard:KeyUp({parseKey("O")})
-		handler.Mouse:MoveXYByStick(state.X, state.Y, 130, 111, 5)
+	end
+"""
+"DOWN" = """
+	function Down(state, handler)
+		handler.Mouse:LeftPress()
+	end
+	function Up(state, handler)
+		handler.Mouse:LeftRelease()
+	end
+"""
+"STICK" = """
+	function Change(state, handler)
+		handler.Mouse:MoveXYByStick(state.X, state.Y, 132, 126, 18, 10, 0.12)
 	end
 """

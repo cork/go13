@@ -2,6 +2,7 @@ package g13
 
 import (
 	"encoding/binary"
+	"fmt"
 	"log"
 	"sort"
 	"strings"
@@ -27,10 +28,17 @@ type Button uint64
 
 // State contains the events current keyboard state
 type State struct {
-	X       byte
-	Y       byte
+	*Vertex
+	Old     *Vertex
 	Buttons Button
 }
+
+// Vertex X, Y byte
+type Vertex struct {
+	X, Y byte
+}
+
+var oldVertex = &Vertex{X: 0, Y: 0}
 
 // FindDevices finds all G13 devices and call ReadDevice for each device found
 func FindDevices(action EventHandler) bool {
@@ -99,13 +107,22 @@ func ReadDevice(dev *gousb.Device, action EventHandler, wg *sync.WaitGroup) {
 		}
 		copy(buttons, buf[3:readBytes])
 		state := State{
-			X:       buf[1],
-			Y:       buf[2],
+			Vertex:  &Vertex{X: buf[1], Y: buf[2]},
+			Old:     oldVertex,
 			Buttons: Button(binary.LittleEndian.Uint64(buttons)),
 		}
 		log.Printf("%+v\n", state)
 		action.Event(state)
+		oldVertex = state.Vertex
 	}
+}
+
+func (v *Vertex) String() string {
+	return fmt.Sprintf("{X:%d Y:%d}", v.X, v.Y)
+}
+
+func (s *State) String() string {
+	return fmt.Sprintf("%s %s", s.Vertex, s.Buttons)
 }
 
 func (b Button) String() string {
