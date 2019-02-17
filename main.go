@@ -20,7 +20,7 @@ func main() {
 	eventHandler := action.NewHandler()
 	defer eventHandler.Close()
 
-	config, err := LoadTOMLConfig(*initialConfig)
+	config, err := action.LoadTOMLConfig(*initialConfig)
 	if err != nil {
 		log.Println(err)
 		return

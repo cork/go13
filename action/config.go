@@ -1,4 +1,4 @@
-package main
+package action
 
 import (
 	"errors"
@@ -12,8 +12,7 @@ import (
 
 	"github.com/spf13/pflag"
 
-	"./action"
-	"./g13"
+	"../g13"
 )
 
 // Config input actions
@@ -64,7 +63,7 @@ func (c *Config) Validate() ([]error, bool) {
 			keys := strings.Split(key, "+")
 			for _, key := range keys {
 				if _, ok := g13.KEY[key]; !ok {
-					if _, ok = action.EVENTS[key]; !ok {
+					if _, ok = EVENTS[key]; !ok {
 						invalid = append(invalid, fmt.Errorf("unknown key \"%s\"", key))
 					}
 				}
@@ -78,7 +77,7 @@ func (c *Config) Validate() ([]error, bool) {
 				case string:
 					keys := strings.Split(strings.TrimSpace(actionKeys.(string)), "+")
 					for _, actionKey := range keys {
-						if _, ok := action.KEY[actionKey]; !ok {
+						if _, ok := KEY[actionKey]; !ok {
 							invalid = append(invalid, fmt.Errorf("\"%s\" has unknown action key \"%s\"", key, actionKey))
 						}
 					}
@@ -94,16 +93,16 @@ func (c *Config) Validate() ([]error, bool) {
 }
 
 // ToActions converts config values to actions
-func (c *Config) ToActions(h *action.Handler, actions action.Profiles) {
+func (c *Config) ToActions(h *Handler, actions Profiles) {
 	for profile, acts := range *c {
 		for keys, act := range acts {
 			if _, ok := actions[profile]; !ok {
-				actions[profile] = action.Actions{}
+				actions[profile] = Actions{}
 			}
 
 			switch act.(type) {
 			case string:
-				g13Keys, ok := action.EVENTS[keys]
+				g13Keys, ok := EVENTS[keys]
 				if !ok {
 					g13Keys = g13.ParseKey(keys)
 				}

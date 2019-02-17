@@ -13,3 +13,13 @@ func (uh *UserHandler) ChangeProfile(newProfile string) {
 		uh.h.Profile = newProfile
 	}
 }
+
+// ChangeConfig Switch configuration file used in handler
+func (uh *UserHandler) ChangeConfig(newConfig string) {
+	config, err := LoadTOMLConfig(newConfig)
+	if err != nil {
+		return
+	}
+
+	config.ToActions(uh.h, uh.h.Actions)
+}

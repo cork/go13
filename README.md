@@ -44,7 +44,7 @@ It will read configuration from test.toml for now.
 - [x] Parsing profile and actions from TOML configuration file.
 - [x] Stick mouse movement support.
 - [x] TOML configuration folder.
-- [ ] Action to switch configuration.
+- [x] Action to switch configuration.
 - [ ] HTTP endpoint for adding/modifying actions and profiles.
 - [ ] HTTP endpoint for removing actions and profiles.
 - [ ] HTTP endpoint for switcing profile.
