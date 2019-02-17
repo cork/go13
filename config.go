@@ -3,10 +3,14 @@ package main
 import (
 	"errors"
 	"fmt"
+	"os"
+	"path"
 	"reflect"
 	"strings"
 
 	"github.com/BurntSushi/toml"
+
+	"github.com/spf13/pflag"
 
 	"./action"
 	"./g13"
@@ -15,10 +19,31 @@ import (
 // Config input actions
 type Config map[string]map[string]interface{}
 
-// ParseTOMLConfig parses a string into a Config map
-func ParseTOMLConfig(s *string) (*Config, error) {
+var configFolder = pflag.StringP("toml-path", "p", "config", "Storage folder for configuration files, defaults to working directory")
+
+// LoadTOMLConfig loads a TOML configuration from file if the toml-path is configured
+func LoadTOMLConfig(name string) (*Config, error) {
+	name = path.Clean(name)
+
+	if *configFolder == "" {
+		return nil, errors.New("TOML config folder missing")
+	}
+
+	if _, err := os.Stat(path.Join(*configFolder, name+".toml")); os.IsNotExist(err) {
+		return nil, err
+	}
+
 	var c Config
-	_, err := toml.Decode(*s, &c)
+	if _, err := toml.DecodeFile(path.Join(*configFolder, name+".toml"), &c); err != nil {
+		return nil, err
+	}
+	return &c, nil
+}
+
+// ParseTOMLConfig parses a string into a Config map
+func ParseTOMLConfig(s string) (*Config, error) {
+	var c Config
+	_, err := toml.Decode(s, &c)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +64,9 @@ func (c *Config) Validate() ([]error, bool) {
 			keys := strings.Split(key, "+")
 			for _, key := range keys {
 				if _, ok := g13.KEY[key]; !ok {
-					invalid = append(invalid, fmt.Errorf("unknown key \"%s\"", key))
+					if _, ok = action.EVENTS[key]; !ok {
+						invalid = append(invalid, fmt.Errorf("unknown key \"%s\"", key))
+					}
 				}
 			}
 
@@ -76,12 +103,44 @@ func (c *Config) ToActions(h *action.Handler, actions action.Profiles) {
 
 			switch act.(type) {
 			case string:
+				g13Keys, ok := action.EVENTS[keys]
+				if !ok {
+					g13Keys = g13.ParseKey(keys)
+				}
+
 				action := act.(string)
-				actions[profile][g13.ParseKey(keys)] = h.BindLua(&action)
+				actions[profile][g13Keys] = h.BindLua(&action)
 			case []interface{}:
 				actionKeys := act.([]interface{})[0].(string)
 				actions[profile][g13.ParseKey(keys)] = h.KeyPressAction(actionKeys)
 			}
 		}
 	}
+}
+
+// SaveAsTOML saves the config to disk if a config folter is configured
+func (c *Config) SaveAsTOML(name string) error {
+	name = path.Clean(name)
+
+	if _, err := os.Stat(path.Join(*configFolder, name+".toml")); err == nil {
+		return errors.New("file exists")
+	}
+
+	if err := os.MkdirAll(*configFolder, os.ModePerm); err != nil {
+		return err
+	}
+
+	f, err := os.Create(path.Join(*configFolder, name+".toml"))
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	if err := toml.NewEncoder(f).Encode(c); err != nil {
+		return err
+	}
+
+	f.Sync()
+
+	return nil
 }

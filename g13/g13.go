@@ -140,5 +140,5 @@ func (b Button) String() string {
 
 // Test tests if a button combo is pressent
 func (b Button) Test(button Button) bool {
-	return b&button == button
+	return b&button == button && button != 0
 }

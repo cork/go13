@@ -43,7 +43,7 @@ It will read configuration from test.toml for now.
 - [x] G13 buttons to lua scripting actions mapping.
 - [x] Parsing profile and actions from TOML configuration file.
 - [x] Stick mouse movement support.
-- [ ] TOML configuration folder.
+- [x] TOML configuration folder.
 - [ ] Action to switch configuration.
 - [ ] HTTP endpoint for adding/modifying actions and profiles.
 - [ ] HTTP endpoint for removing actions and profiles.

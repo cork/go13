@@ -17,6 +17,12 @@ type Handler struct {
 	User    UserHandler
 }
 
+// EVENTS list of special g13 event types
+var EVENTS = map[string]g13.Button{
+	"EVENT": g13.Button(0x10000000000),
+	"STICK": g13.Button(0x20000000000),
+}
+
 // Event process events from g13
 func (h *Handler) Event(state g13.State) {
 	h.event <- &state
@@ -62,7 +68,7 @@ func (h *Handler) eventHandler() {
 			stick := (state.X != state.Old.X || state.Y != state.Old.Y)
 
 			for buttons, action := range h.Actions[h.Profile] {
-				if stick && buttons == g13.Stick {
+				if (stick && buttons == EVENTS["STICK"]) || buttons == EVENTS["EVENT"] {
 					action.Change(state)
 				} else if active := state.Buttons.Test(buttons); active != action.Active {
 					action.Active = active

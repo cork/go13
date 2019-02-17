@@ -2,20 +2,29 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/signal"
+
+	"github.com/ogier/pflag"
 
 	"./action"
 	"./g13"
 )
 
+var initialConfig = pflag.StringP("toml", "t", "default", "Default config to start with")
+
 func main() {
+	pflag.Parse()
+
 	eventHandler := action.NewHandler()
 	defer eventHandler.Close()
 
-	config, _ := ParseTOMLConfig(func(config []byte, err error) *string { script := string(config); return &script }(ioutil.ReadFile("test.toml")))
+	config, err := LoadTOMLConfig(*initialConfig)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
 	if errs, ok := config.Validate(); !ok {
 		for _, err := range errs {

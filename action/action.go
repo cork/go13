@@ -31,16 +31,37 @@ func (h *Handler) BindLua(script *string) *Action {
 	L := lua.NewState()
 	defer L.Close()
 
-	L.SetGlobal("parseKey", L.NewFunction(func(L *lua.LState) int {
-		key := L.ToString(1)
-		L.Push(lua.LNumber(KEY[key]))
-		return 1
+	L.SetGlobal("G13", L.SetFuncs(L.NewTable(), map[string]lua.LGFunction{
+		"parseKey": func(L *lua.LState) int {
+			key := L.ToString(2)
+
+			L.Push(lua.LNumber(g13.ParseKey(key)))
+			return 1
+		},
+		"test": func(L *lua.LState) int {
+			buttons := g13.Button(L.ToInt64(2))
+			target := g13.Button(L.ToInt64(3))
+
+			L.Push(lua.LBool(buttons.Test(target)))
+			return 1
+		},
 	}))
 
-	L.SetGlobal("parseKeys", L.NewFunction(func(L *lua.LState) int {
-		keys := L.ToString(1)
-		L.Push(luar.New(L, ParseKeyboardKey(keys)))
-		return 1
+	L.SetGlobal("keyboard", L.SetFuncs(L.NewTable(), map[string]lua.LGFunction{
+		"parseKey": func(L *lua.LState) int {
+			key := L.ToString(2)
+			result := ParseKeyboardKey(key)
+
+			L.Push(lua.LNumber(result[0]))
+			return 1
+		},
+		"parseKeys": func(L *lua.LState) int {
+			key := L.ToString(2)
+			result := ParseKeyboardKey(key)
+
+			L.Push(luar.New(L, result))
+			return 1
+		},
 	}))
 
 	L.SetGlobal("Nanosecond", lua.LNumber(int64(time.Nanosecond)))
@@ -51,6 +72,7 @@ func (h *Handler) BindLua(script *string) *Action {
 	L.SetGlobal("sleep", L.NewFunction(func(L *lua.LState) int {
 		duration := L.ToInt64(1)
 		time.Sleep(time.Duration(duration))
+
 		return 0
 	}))
 

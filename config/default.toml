@@ -1,0 +1,43 @@
+[main]
+G1 = ["A"]
+G2 = ["LEFTSHIFT+B+C"]
+"G3+G4" = ["D"]
+"G5" = """
+	local hel = keyboard:parseKeys("H+E+L")
+	local lo = keyboard:parseKeys("L+O")
+
+	function Down(state, handler)
+		handler.Keyboard:KeyDown(hel)
+		handler.Keyboard:KeyUp(hel)
+		handler.Keyboard:KeyDown(lo)
+		handler.Keyboard:KeyUp(lo)
+	end
+"""
+"DOWN" = """
+	function Down(state, handler)
+		handler.Mouse:LeftPress()
+	end
+	function Up(state, handler)
+		handler.Mouse:LeftRelease()
+	end
+"""
+"STICK" = """
+	function Change(state, handler)
+		handler.Mouse:MoveXYByStick(state.X, state.Y, 132, 126, 18, 10, 0.12)
+	end
+"""
+"EVENT" = """
+	local left = G13:parseKey("LEFT")
+	local a = keyboard:parseKey("A")
+	local active = false
+
+	function Change(state, handler)
+		if state.X > 250 and state.Y > 57 and state.Y < 157 and G13:test(state.Buttons, left) then
+			handler.Keyboard:KeyDown({a})
+			active = true
+		elseif active then
+			handler.Keyboard:KeyUp({a})
+			active = false
+		end
+	end
+"""
