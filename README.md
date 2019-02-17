@@ -13,6 +13,7 @@ This is very much a WIP. The basics are implemented but there is a long way left
 You will need:
 - github.com/BurntSushi/toml
 - github.com/google/gousb
+- github.com/ogier/pflag
 - github.com/sashko/go-uinput
 - github.com/yuin/gopher-lua
 - layeh.com/gopher-luar
@@ -22,6 +23,7 @@ You will need:
 ```bash
 go get github.com/BurntSushi/toml
 go get github.com/google/gousb
+go get github.com/ogier/pflag
 go get github.com/sashko/go-uinput
 go get github.com/yuin/gopher-lua
 go get layeh.com/gopher-luar
