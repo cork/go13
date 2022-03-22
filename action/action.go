@@ -4,7 +4,8 @@ import (
 	"log"
 	"time"
 
-	"../g13"
+	"cork/go13/g13"
+
 	lua "github.com/yuin/gopher-lua"
 	luar "layeh.com/gopher-luar"
 )

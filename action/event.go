@@ -4,12 +4,13 @@ import (
 	"log"
 	"sync"
 
-	"../g13"
+	"cork/go13/g13"
 	uinput "github.com/sashko/go-uinput"
 )
 
 // Handler Keyboard implementation of EventHandler
 type Handler struct {
+	Config  *Config
 	Actions Profiles
 	Profile string
 	event   chan *g13.State
@@ -29,7 +30,7 @@ func (h *Handler) Event(state g13.State) {
 }
 
 // NewHandler initiate a new Handler struct with a bound keyboard
-func NewHandler() *Handler {
+func (c *Config) NewHandler() *Handler {
 	kb, err := uinput.CreateKeyboard()
 	if err != nil {
 		log.Fatalf("CreateKeyboard: %s", err)
@@ -42,10 +43,15 @@ func NewHandler() *Handler {
 	if err != nil {
 		log.Fatalf("CreateTouchPad: %s", err)
 	}
-	h := Handler{Profile: "main", Actions: Profiles{}, event: make(chan *g13.State)}
-	h.User = UserHandler{
-		Keyboard: &UserKeyboard{kb: kb},
-		Mouse:    &UserMouse{mouse: mouse, touchPad: touchPad, stopMoveCh: make(chan bool), movedCh: make(chan bool)},
+	h := Handler{
+		Config:  c,
+		Profile: "main",
+		Actions: Profiles{},
+		User: UserHandler{
+			Keyboard: &UserKeyboard{kb: kb},
+			Mouse:    &UserMouse{mouse: mouse, touchPad: touchPad, stopMoveCh: make(chan bool), movedCh: make(chan bool)},
+		},
+		event: make(chan *g13.State),
 	}
 
 	h.wg.Add(1)

@@ -16,10 +16,10 @@ func (uh *UserHandler) ChangeProfile(newProfile string) {
 
 // ChangeConfig Switch configuration file used in handler
 func (uh *UserHandler) ChangeConfig(newConfig string) {
-	config, err := LoadTOMLConfig(newConfig)
+	err := uh.h.Config.LoadTOMLConfig(newConfig)
 	if err != nil {
 		return
 	}
 
-	config.ToActions(uh.h, uh.h.Actions)
+	uh.h.Config.ToActions(uh.h, uh.h.Actions)
 }

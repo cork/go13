@@ -2,33 +2,45 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 
 	"github.com/ogier/pflag"
 
-	"./action"
-	"./g13"
+	"cork/go13/action"
+	"cork/go13/g13"
 )
 
-var initialConfig = pflag.StringP("toml", "t", "default", "Default config to start with")
-
 func main() {
+	initialConfig := pflag.StringP("toml", "t", "default", "Default config to start with")
+	configFolder := pflag.StringP("toml-path", "p", "./config", "Storage folder for configuration files, defaults to working directory")
+	help := pflag.BoolP("help", "h", false, "Display this message")
+
 	pflag.Parse()
 
-	eventHandler := action.NewHandler()
-	defer eventHandler.Close()
+	if *help {
+		pflag.Usage()
+		os.Exit(1)
+	}
 
-	config, err := action.LoadTOMLConfig(*initialConfig)
+	config, err := action.NewConfig(*configFolder)
 	if err != nil {
-		log.Println(err)
+		fmt.Println(err)
 		return
 	}
 
-	if errs, ok := config.Validate(); !ok {
+	eventHandler := config.NewHandler()
+	defer eventHandler.Close()
+
+	err = config.LoadTOMLConfig(*initialConfig)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	if errs, ok := config.Actions.Validate(); !ok {
 		for _, err := range errs {
-			log.Println(err)
+			fmt.Println(err)
 			return
 		}
 	}
@@ -36,6 +48,9 @@ func main() {
 	config.ToActions(eventHandler, eventHandler.Actions)
 
 	g13.FindDevices(eventHandler)
+
+	startWebServer(config)
+
 	quitCh := make(chan os.Signal)
 	signal.Notify(quitCh, os.Interrupt)
 	<-quitCh
