@@ -21,12 +21,7 @@ You will need:
 ## Install
 
 ```bash
-go get github.com/BurntSushi/toml
-go get github.com/google/gousb
-go get github.com/ogier/pflag
-go get github.com/sashko/go-uinput
-go get github.com/yuin/gopher-lua
-go get layeh.com/gopher-luar
+go get
 go build
 ```
 
