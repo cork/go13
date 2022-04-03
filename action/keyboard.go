@@ -9,7 +9,7 @@ import (
 
 // KEY possible keybiard keys
 var KEY = map[string]uint16{
-	"ESC":        uinput.Key1,
+	"ESC":        uinput.KeyEsc,
 	"1":          uinput.Key1,
 	"2":          uinput.Key2,
 	"3":          uinput.Key3,
