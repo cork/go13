@@ -121,6 +121,10 @@ func (c *Config) ToActions(h *Handler, actions Profiles) {
 					g13Keys = g13.ParseKey(keys)
 				}
 
+				if actions[profile][g13Keys] != nil && actions[profile][g13Keys].state != nil {
+					actions[profile][g13Keys].state.Close()
+				}
+
 				action := act.(string)
 				actions[profile][g13Keys] = h.BindLua(&action)
 			case []interface{}:

@@ -25,12 +25,12 @@ type Action struct {
 	Change Func
 	Down   Func
 	Up     Func
+	state  *lua.LState
 }
 
 // BindLua provides helpers and binds Up and Down in a lua script
 func (h *Handler) BindLua(script *string) *Action {
 	L := lua.NewState()
-	defer L.Close()
 
 	L.SetGlobal("G13", L.SetFuncs(L.NewTable(), map[string]lua.LGFunction{
 		"parseKey": func(L *lua.LState) int {
@@ -85,6 +85,7 @@ func (h *Handler) BindLua(script *string) *Action {
 	luaUserHandler := luar.New(L, h.User)
 
 	action := Action{
+		state: L,
 		Change: func(state *g13.State) {
 			luaState := luar.New(L, state)
 
